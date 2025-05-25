@@ -1,6 +1,58 @@
+create table rangers(
+    ranger_id serial PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    region VARCHAR(50) NOT NULL
+);
+
+create table species(
+    species_id serial PRIMARY KEY,
+    common_name VARCHAR(50) NOT NULL,
+    scientific_name VARCHAR(50) NOT NULL,
+    discovery_date DATE NOT NULL,
+    conservation_status VARCHAR(50) NOT NULL
+);
+
+create table sightings(
+    sighting_id SERIAL PRIMARY KEY,
+    ranger_id int REFERENCES rangers(ranger_id),
+    species_id int REFERENCES species(species_id),
+    sighting_time TIMESTAMP,
+    location VARCHAR(50),
+    notes VARCHAR(80)
+);
+
+INSERT INTO rangers (ranger_id, name, region) VALUES
+(1, 'Alice Green', 'Northern Hills'),
+(2, 'Bob White', 'River Delta'),
+(3, 'Carol King', 'Mountain Range');
+
+INSERT INTO species (species_id, common_name, scientific_name, discovery_date, conservation_status) VALUES
+(1, 'Snow Leopard', 'Panthera uncia', '1775-01-01', 'Endangered'),
+(2, 'Bengal Tiger', 'Panthera tigris tigris', '1758-01-01', 'Endangered'),
+(3, 'Red Panda', 'Ailurus fulgens', '1825-01-01', 'Vulnerable'),
+(4, 'Asiatic Elephant', 'Elephas maximus indicus', '1758-01-01', 'Endangered');
+
+INSERT INTO sightings (sighting_id, species_id, ranger_id, location, sighting_time, notes) VALUES
+(1, 1, 1, 'Peak Ridge', '2024-05-10 07:45:00', 'Camera trap image captured'),
+(2, 2, 2, 'Bankwood Area', '2024-05-12 16:20:00', 'Juvenile seen'),
+(3, 3, 3, 'Bamboo Grove East', '2024-05-15 09:10:00', 'Feeding observed'),
+(4, 1, 2, 'Snowfall Pass', '2024-05-18 18:30:00', NULL);
+
+
+select * from rangers;
+select * from species;
+select * from sightings;
+
+
 
 -- Problem 1
 INSERT into rangers(name, region) VALUES('Derek Fox', 'Coastal Plains');
+
+-- got "duplicate key value violates unique constraint" error 
+-- to fix the error below code to run at first
+SELECT setval(pg_get_serial_sequence('rangers', 'ranger_id'), (SELECT MAX(ranger_id) FROM rangers) + 1);
+-- source: https://stackoverflow.com/questions/4448340/postgresql-duplicate-key-violates-unique-constraint
+
 
 -- Problem 2
 select count(*) as unique_species_count  from (select species_id from sightings GROUP BY species_id);
@@ -38,51 +90,4 @@ select st.sighting_id, timeOfDay(st.sighting_time) as time_of_day from sightings
 
 -- Problem 9
 delete from rangers where ranger_id not in (select ranger_id from sightings );
-
-
--- select * from rangers;
--- select * from species;
--- select * from sightings;
-
-
--- create table rangers(
---     ranger_id serial PRIMARY KEY,
---     name VARCHAR(50) NOT NULL,
---     region VARCHAR(50) NOT NULL
--- );
-
-
--- create table species(
---     species_id serial PRIMARY KEY,
---     common_name VARCHAR(50) NOT NULL,
---     scientific_name VARCHAR(50) NOT NULL,
---     discovery_date DATE NOT NULL,
---     conservation_status VARCHAR(50) NOT NULL
--- );
-
--- create table sightings(
---     sighting_id SERIAL PRIMARY KEY,
---     ranger_id int REFERENCES rangers(ranger_id),
---     species_id int REFERENCES species(species_id),
---     sighting_time TIMESTAMP,
---     location VARCHAR(50),
---     notes VARCHAR(80)
--- );
-
--- INSERT INTO rangers (ranger_id, name, region) VALUES
--- (1, 'Alice Green', 'Northern Hills'),
--- (2, 'Bob White', 'River Delta'),
--- (3, 'Carol King', 'Mountain Range');
-
--- INSERT INTO species (species_id, common_name, scientific_name, discovery_date, conservation_status) VALUES
--- (1, 'Snow Leopard', 'Panthera uncia', '1775-01-01', 'Endangered'),
--- (2, 'Bengal Tiger', 'Panthera tigris tigris', '1758-01-01', 'Endangered'),
--- (3, 'Red Panda', 'Ailurus fulgens', '1825-01-01', 'Vulnerable'),
--- (4, 'Asiatic Elephant', 'Elephas maximus indicus', '1758-01-01', 'Endangered');
-
--- INSERT INTO sightings (sighting_id, species_id, ranger_id, location, sighting_time, notes) VALUES
--- (1, 1, 1, 'Peak Ridge', '2024-05-10 07:45:00', 'Camera trap image captured'),
--- (2, 2, 2, 'Bankwood Area', '2024-05-12 16:20:00', 'Juvenile seen'),
--- (3, 3, 3, 'Bamboo Grove East', '2024-05-15 09:10:00', 'Feeding observed'),
--- (4, 1, 2, 'Snowfall Pass', '2024-05-18 18:30:00', NULL);
 
